@@ -2,6 +2,8 @@
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using TgBotBorderCross.Abstract;
 
 namespace TgBotBorderCross.Services
 {
@@ -35,7 +37,40 @@ namespace TgBotBorderCross.Services
 
         private async Task OnMessage(Message message)
         {
+            if (message.Text is not { } messageText)
+                return;
+
+            Message sendMessage = await (messageText switch 
+            {
+                "/start" => HelloMessage(message),
+                "Разъяснения по вопросам пропуска через ГГ РФ" => PropuskMessage(message),
+                "Разъяснения вопросам пограничного режима" => WorkLaterMessage(message),
+                "Актуальные вакансии" => WorkLaterMessage(message),
+                 
+            });
+
             logger.LogInformation($"Message: {message}");
+        }
+
+        private async Task<Message> WorkLaterMessage(Message message)
+        {
+            return await bot.SendTextMessageAsync(message.Chat, text:"Данный радел находится в разработке!");
+        }
+
+        private async Task<Message> PropuskMessage(Message message)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task<Message> HelloMessage(Message message)
+        {
+            string helloMsg = $"👋Здравствуйте, {message.From.FirstName}{Environment.NewLine}" +
+                     $"Данный бот разработан для разъяснений по{Environment.NewLine}"
+                     + $"пересечению государственной границы на участке{Environment.NewLine}"
+                     + $"ПУ ФСБ России по городу Санкт-Петербургу{Environment.NewLine}";
+
+            return await bot.SendTextMessageAsync(message.Chat, helloMsg, parseMode:ParseMode.Html,
+                replyMarkup: MenuCreator.MainMenu());
         }
     }
 }
