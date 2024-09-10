@@ -20,6 +20,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddScoped<ReceiverService>();
         services.AddHostedService<PollingService>();
     })
+    .UseSystemd()
     .Build();
 
 await host.RunAsync();
